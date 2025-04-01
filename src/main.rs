@@ -217,14 +217,17 @@ fn main() {
     //let (mut left, mut right) = split_vec(word.clone());
 
     let shuffled_key = permutation(key.clone());
-    println!("PC1 56 bit key: {:?}", shuffled_key);
-    let (mut left_key, mut right_key) = split_vec(shuffled_key.clone());
+    println!("PC1 key is: {:?}, and is {:?} bits long", shuffled_key, shuffled_key.len());
+    let key56 = find_key(shuffled_key.clone());
+    println!("56 bit key is : {:?}, and is {:?} bits long", key56, key56.len());
+    let (mut left_key, mut right_key) = split_vec(key56.clone());
+    
     (left_key, right_key) = (bit_shift(left_key, 1), bit_shift(right_key, 1));
-    println!("left key: {:?}", left_key);
-    println!("right key: {:?}", right_key);
+    println!("left key is: {:?} and is {:?} bits long", left_key, left_key.len());
+    println!("right key is: {:?} and is {:?} bits long", right_key, right_key.len());
     left_key.append(&mut right_key);
     let new_key56 = left_key.clone();
-    println!("56 bit key: {:?}", new_key56);
-
-    println!("compressed 56 key: {:?}", compress(new_key56));
+    println!("concatenated 56 bit key is: {:?}, and is {:?} bits long", new_key56, new_key56.len());
+    let compressed_key = compress(new_key56);
+    println!("compressed 56 key is: {:?} and is {:?} bits long", compressed_key, compressed_key.len());
 }
