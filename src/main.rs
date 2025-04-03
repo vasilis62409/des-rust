@@ -11,6 +11,15 @@ const IP: [u32; 64] = [58, 50, 42, 34, 26, 18, 10, 2,
                        61, 53, 45, 37, 29, 21, 13, 5,
                        63, 55, 47, 39, 31, 23, 15, 7];
 
+const KEY_SHIFT: [u8; 56] = [57, 49,  41,  33,  25,  17,   9,
+                              1, 58,  50,  42,  34,  26,  18,
+                             10,  2,  59,  51,  43,  35,  27,
+                             19, 11,   3,  60,  52,  44,  36,
+                             63, 55,  47,  39,  31,  23,  15,
+                              7, 62,  54,  46,  38,  30,  22,
+                             14,  6,  61,  53,  45,  37,  29,
+                             21, 13,   5,  28,  20,  12,   4];
+
 // Key shifts table
 const SHIFTS: [u32; 16] = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1];
 
@@ -104,10 +113,8 @@ static P_BOX:[u32; 32] = [16,  7, 20, 21,
 fn find_key(key: Vec<u8>) -> Vec<u8> {
     let mut new_key = Vec::new();
 
-    for i in 0..key.len() {
-        if ((i+1)%8 != 0) | (i == 0) {
-            new_key.push(key[i]);
-        }
+    for i in 0..56 {
+        new_key.push(key[(KEY_SHIFT[i]-1) as usize]);
     }
     new_key
 }
@@ -142,12 +149,14 @@ fn permutation(word: Vec<u8>) -> Vec<u8> {
 }
 
 // Before we compress we need to shift the bits in the key
+// I don't like this implementation, I'll think of something better
 fn bit_shift(key: Vec<u8>, round: usize) -> Vec<u8> {
     let shift = SHIFTS[round] as usize;     // Indices must be usize*
     let mut shifted_key = Vec::new();
+    let len = key.len();
     
     for i in 0..key.len() {
-        shifted_key.push(key[((i+shift)%key.len()) as usize])
+        shifted_key.push(key[((i+len+shift)%len) as usize]);
     }
     shifted_key
 }
@@ -216,12 +225,11 @@ fn main() {
 
     //let (mut left, mut right) = split_vec(word.clone());
 
-    let shuffled_key = permutation(key.clone());
+    let shuffled_key = find_key(key.clone());
     println!("PC1 key is: {:?}, and is {:?} bits long", shuffled_key, shuffled_key.len());
-    let key56 = find_key(shuffled_key.clone());
-    println!("56 bit key is : {:?}, and is {:?} bits long", key56, key56.len());
-    let (mut left_key, mut right_key) = split_vec(key56.clone());
-    
+    let (mut left_key, mut right_key) = split_vec(shuffled_key.clone());
+    println!("left key 0 is: {:?}", left_key);
+    println!("right key 0 is: {:?}", right_key);
     (left_key, right_key) = (bit_shift(left_key, 1), bit_shift(right_key, 1));
     println!("left key is: {:?} and is {:?} bits long", left_key, left_key.len());
     println!("right key is: {:?} and is {:?} bits long", right_key, right_key.len());
