@@ -137,17 +137,6 @@ fn split_vec(letters: Vec<u8>) -> (Vec<u8>, Vec<u8>) {
     (left, right)
 }
 
-// Next is the initial permutation function that acts, based on the table,
-// on the input word. 
-fn permutation(word: Vec<u8>) -> Vec<u8> {
-    let mut init_p = Vec::new();
-
-    for i in 0..word.len() {
-        init_p.push(word[(IP[i]-1) as usize]);
-    }   
-    init_p
-}
-
 // Before we compress we need to shift the bits in the key
 // I don't like this implementation, I'll think of something better
 fn bit_shift(key: Vec<u8>, round: usize) -> Vec<u8> {
@@ -171,8 +160,20 @@ fn compress(key: Vec<u8>) -> Vec<u8> {
     compressed
 }
 
+// Now the message. 
+// First is the initial permutation function that acts, based on the table,
+// on the input word. 
+fn permutation(word: Vec<u8>) -> Vec<u8> {
+    let mut init_p = Vec::new();
 
-// Last thing is the expansion on the RPT
+    for i in 0..word.len() {
+        init_p.push(word[(IP[i]-1) as usize]);
+    }   
+    init_p
+}
+
+// Next we split the message into two halves. For this we use the same split_vec function as for the key
+// After that we have the expansion on the RPT
 fn expand(word: Vec<u8>) -> Vec<u8> {
     let mut expanded = Vec::new();
 
@@ -182,13 +183,41 @@ fn expand(word: Vec<u8>) -> Vec<u8> {
     expanded
 }
 
-// fn s_box_trans(word: Vec<u8>, round: usize) -> Vec<u8> {
-//     let mut transformed = Vec::new();
+// Now combine key and RPT to get a permutation
+fn combination(key: Vec<u8>, rpt: Vec<u8>) -> Vec<u8> {
+    let mut new_rpt = Vec::new();
 
-//     for i in 0..word.len() {
-//         transformed.push(word[S_BOXES[round][1]])
-//     }
-// }
+    for i in 0..key.len() {
+        new_rpt.push(key[i] ^ rpt[i]);
+    }
+    new_rpt
+}
+
+// S-boxes on the outcome of the last function
+fn s_box_trans(word: Vec<u8>, round: usize) -> Vec<u32> {
+    let mut transformed = Vec::new();
+    let mut col = 0;
+    let mut row = 0;
+
+    for i in 0..8{
+        for j in i..i+6 {
+            if((j % 6 == 0) | (j % 6 == 5)) {
+                col = col + word[j];
+            }
+            else {
+                row = row + word[j];
+            }
+        }
+        transformed.push(S_BOXES[round][row as usize][col as usize]);
+        row = 0;
+        col = 0;
+    }
+    transformed
+}
+
+// We conactenate the two halves
+
+// Next is the P-box transformation
 
 // Now the repeating part
 // fn encryption(word: Vec:<u8>, key: Vec<u8>) -> Vec<u8> {
@@ -238,4 +267,6 @@ fn main() {
     println!("concatenated 56 bit key is: {:?}, and is {:?} bits long", new_key56, new_key56.len());
     let compressed_key = compress(new_key56);
     println!("compressed 56 key is: {:?} and is {:?} bits long", compressed_key, compressed_key.len());
+    let test_s = s_box_trans(word, 1);
+    println!("Test for s_box: {:?}", test_s);
 }
