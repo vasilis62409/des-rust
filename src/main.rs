@@ -194,18 +194,22 @@ fn combination(key: Vec<u8>, rpt: Vec<u8>) -> Vec<u8> {
 }
 
 // S-boxes on the outcome of the last function
+// need to fix the powers of 2
 fn s_box_trans(word: Vec<u8>, round: usize) -> Vec<u32> {
     let mut transformed = Vec::new();
-    let mut col = 0;
-    let mut row = 0;
+    let mut col = 0_u32;
+    let mut row = 0_u32;
 
     for i in 0..8{
-        for j in i..i+6 {
-            if((j % 6 == 0) | (j % 6 == 5)) {
-                col = col + word[j];
+        for j in 0..6 {
+            // One of these two is shit. Need to fix
+            if(j % 6 == 0) | (j % 6 == 5) {
+                row = row + (word[j+i*6]) as u32*(2_i32.pow((j%2).try_into().unwrap())) as u32;
+                println!("{:?}, {:?}: {:?}",j, j+i*6, col);
             }
             else {
-                row = row + word[j];
+                col = col + (word[j+i*6]) as u32*(2_u8.pow((j-1).try_into().unwrap())) as u32;
+                println!("{:?}, {:?}: {:?}",j, j+i*6, row);
             }
         }
         transformed.push(S_BOXES[round][row as usize][col as usize]);
