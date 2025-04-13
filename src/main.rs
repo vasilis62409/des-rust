@@ -194,25 +194,39 @@ fn combination(key: Vec<u8>, rpt: Vec<u8>) -> Vec<u8> {
 }
 
 // S-boxes on the outcome of the last function
-// need to fix the powers of 2
+// need to fix the powers of 2... got it!!
+// now to binary rep... oh god!!!
 fn s_box_trans(word: Vec<u8>, round: usize) -> Vec<u32> {
     let mut transformed = Vec::new();
     let mut col = 0_u32;
     let mut row = 0_u32;
+    let mut out = 0_i32;
+    let mut diff = 0_i32;
 
     for i in 0..8{
         for j in 0..6 {
             // One of these two is shit. Need to fix
             if(j % 6 == 0) | (j % 6 == 5) {
-                row = row + (word[j+i*6]) as u32*(2_i32.pow((j%2).try_into().unwrap())) as u32;
-                println!("{:?}, {:?}: {:?}",j, j+i*6, col);
+                row = row + (word[j+i*6]) as u32*(2_u32.pow(((j+1)%2).try_into().unwrap()));
             }
             else {
-                col = col + (word[j+i*6]) as u32*(2_u8.pow((j-1).try_into().unwrap())) as u32;
-                println!("{:?}, {:?}: {:?}",j, j+i*6, row);
+                let mut power = ((4-j) as u32)%4;
+                col = col + (word[j+i*6]) as u32*(2_u32.pow((power).try_into().unwrap()));
             }
         }
-        transformed.push(S_BOXES[round][row as usize][col as usize]);
+        out = S_BOXES[round][row as usize][col as usize] as i32;
+        for k in 0..4 {
+            diff = (out-(2_i32.pow((3-k) % 4))) as i32;
+            if diff<0 {
+                //println!("{:?}, {:?}", diff, 2_i32.pow((3-k) % 3));
+                transformed.push(0);
+            }
+            else{
+                //println!("{:?}, {:?}", diff, 2_i32.pow((3-k) % 3));
+                transformed.push(1);
+                out = diff;
+            }
+        }
         row = 0;
         col = 0;
     }
@@ -272,5 +286,5 @@ fn main() {
     let compressed_key = compress(new_key56);
     println!("compressed 56 key is: {:?} and is {:?} bits long", compressed_key, compressed_key.len());
     let test_s = s_box_trans(word, 1);
-    println!("Test for s_box: {:?}", test_s);
+    println!("Test for s_box: {:?}, it's {:?} bits long", test_s, test_s.len());
 }
