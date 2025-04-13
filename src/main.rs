@@ -193,9 +193,7 @@ fn combination(key: Vec<u8>, rpt: Vec<u8>) -> Vec<u8> {
     new_rpt
 }
 
-// S-boxes on the outcome of the last function
-// need to fix the powers of 2... got it!!
-// now to binary rep... oh god!!!
+// S-boxes on the outcome of the last function 
 fn s_box_trans(word: Vec<u8>, round: usize) -> Vec<u32> {
     let mut transformed = Vec::new();
     let mut col = 0_u32;
@@ -233,9 +231,32 @@ fn s_box_trans(word: Vec<u8>, round: usize) -> Vec<u32> {
     transformed
 }
 
-// We conactenate the two halves
-
 // Next is the P-box transformation
+fn p_box_trans(word: Vec<u8>) -> Vec<u8> {
+    let mut transformed = Vec::new();
+
+    for i in 0..word.len() {
+        transformed.push(word[(P_BOX[i-1]) as usize]);
+    }
+    transformed
+}
+
+// We conactenate the two halves
+fn concat(lpt: Vec<u8>, rpt: Vec<u8>) -> Vec<u8>{
+    let conced = Vec::new();
+
+    for bit in rpt {
+        conced.push(bit);
+    }
+
+
+    for bit in lpt {
+        conced.push(bit);
+    }
+    conced
+}
+
+
 
 // Now the repeating part
 // fn encryption(word: Vec:<u8>, key: Vec<u8>) -> Vec<u8> {
