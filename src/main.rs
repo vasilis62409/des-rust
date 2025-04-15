@@ -25,13 +25,9 @@ fn encrypt_message(word: Vec<u8>, key:Vec<u8>) -> Vec<u8> {
 
         // The message 
         new_right_word = message_work::expand(&right_word);
-        println!("expansion: {:?}: ", new_right_word);
         new_right_word = message_work::combination(new_key, new_right_word);
-        println!("xor1: {:?}: ", new_right_word);
         new_right_word = message_work::s_box_trans(new_right_word);
-        println!("S box: {:?}: ", new_right_word);
         new_right_word = message_work::p_box_trans(new_right_word);
-        println!("P box: {:?}: ", new_right_word);
 
         placeholder = right_word;
         right_word = message_work::combination(left_word, new_right_word);
